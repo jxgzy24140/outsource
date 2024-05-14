@@ -1,0 +1,12 @@
+.banner {
+  background-image: url("https://file.hstatic.net/1000075078/file/web_desktop_a50f3240978147428c663fc456e98b8e.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  min-height: 600px;
+}
+
+.secondary:hover {
+  color: #c75d00;
+  transition: 500ms;
+}
