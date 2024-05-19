@@ -36,7 +36,7 @@ class IdentityService {
       };
       const tokenSecretKey = process.env.TOKEN_SECRET_KEY ?? "";
       const accessToken = jwt.sign(payload, tokenSecretKey, {
-        expiresIn: "1h",
+        expiresIn: "72h",
       });
       return {
         success: true,
@@ -85,6 +85,18 @@ class IdentityService {
       account.updatedDate = new Date(Date());
     }
     await this.accountRepository.save(account);
+  }
+
+  async getCurrentLoginInformation(id: any) {
+    const account: any = await this.accountRepository.findOne({
+      where: { userId: id },
+    });
+    return {
+      id: account.userId,
+      fullName: account.fullName,
+      email: account.email,
+      roleId: account.roleId,
+    };
   }
 }
 

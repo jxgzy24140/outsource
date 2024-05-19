@@ -1,17 +1,14 @@
 import http from "@/services/httpService";
-import {
-  ICreateOrderInput,
-  OrderOutputDto,
-  IUpdateOrderInput,
-} from "@/services/order/dto";
+import { OrderOutputDto, IUpdateOrderInput } from "@/services/order/dto";
 import IResponseWithPagination from "@/services/responseWithPaginationDto";
 import { IHttpRequest } from "../httpRequestDto";
 
 class OrderService {
-  public async createOrder(
-    input: ICreateOrderInput
-  ): Promise<IHttpRequest<OrderOutputDto>> {
-    const response = await http.post("orders", input);
+  public async createOrder(input: any): Promise<IHttpRequest<OrderOutputDto>> {
+    const response = await http.post(
+      "http://localhost:8083/api/v1/orders/",
+      input
+    );
     return response.data;
   }
 

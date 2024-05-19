@@ -26,7 +26,6 @@ class OrderService {
     }
     createAsync(input) {
         return __awaiter(this, void 0, void 0, function* () {
-            const date = Date();
             const productResponse = yield axios_1.default.post("http://localhost:8082/api/v1/products/createOrder", { products: input.products });
             if (!productResponse.data.success)
                 return null;
@@ -47,6 +46,9 @@ class OrderService {
                 const orderDetailEntity = this.orderDetailRepository.create(orderDetail);
                 yield this.orderDetailRepository.save(orderDetailEntity);
             }
+            const updateProductResponse = yield axios_1.default.post("http://localhost:8082/api/v1/products/updateProduct", { products: input.products });
+            if (!updateProductResponse.data.success)
+                return null;
             return yield this.getAsync(entity.id);
         });
     }
@@ -59,6 +61,7 @@ class OrderService {
                 if (!entity)
                     return null;
                 entity.orderStatusId = input.orderStatusId;
+                entity.updatedDate = new Date(Date());
                 yield this.orderRepository.save(entity);
                 return yield this.getAsync(entity.id);
             }

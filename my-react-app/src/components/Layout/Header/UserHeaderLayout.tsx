@@ -1,17 +1,14 @@
 import React, { useEffect } from "react";
 import { Layout, Row, Col, Badge, Dropdown, Menu, Input } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "@/components/Layout/Header/index.css";
-import {
-  SearchOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
 import { inject, observer } from "mobx-react";
 import Stores from "@/stores/storeIdentifier";
 import OrderStore from "@/stores/orderStore";
 import withRouter from "../Router/withRouter";
 import AuthenticationStore from "@/stores/authenticationStore";
+import { appLayouts, authLayouts } from "../Router/router.config";
 
 interface IProps {
   navigate: any;
@@ -24,7 +21,9 @@ const UserHeaderLayout = inject(
   Stores.AuthenticationStore
 )(
   observer((props: IProps) => {
-    const { orderStore, authenticationStore } = props;
+    const { orderStore, authenticationStore, navigate } = props;
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
 
     const initValues = () => {
       orderStore.getCart();
@@ -34,6 +33,16 @@ const UserHeaderLayout = inject(
     useEffect(() => {
       initValues();
     }, []);
+
+    const onSearch = (values) => {
+      const typeId = searchParams.get("type");
+      const keyword = values || "";
+      const newUrl = typeId
+        ? `?typeId=${typeId}&keyword=${encodeURIComponent(keyword)}`
+        : `?keyword=${encodeURIComponent(keyword)}`;
+      navigate(newUrl);
+    };
+
     return (
       <Layout.Header
         className="min-w-full bg-white opacity-85 container h-fit border-b-black"
@@ -44,15 +53,16 @@ const UserHeaderLayout = inject(
             <img
               src="https://curnonwatch.com/wp-content/uploads/2023/12/logo.svg"
               alt="logo"
-              onClick={() => props.navigate("home")}
+              onClick={() => navigate(`/${appLayouts.home.path}`)}
+              className="cursor-pointer"
             />
           </Col>
-          <Col span={16}>
+          <Col span={14}>
             <Row className="flex justify-center gap-x-2">
-              <Link className="px-3 py-2" to={"home?type=1"}>
+              <Link className="px-3 py-2" to={"?type=1"}>
                 NAM GIỚI
               </Link>
-              <Link className="px-3 py-2" to={"home?type=2"}>
+              <Link className="px-3 py-2" to={"?type=2"}>
                 NỮ GIỚI
               </Link>
               <Link className="px-3 py-2" to={""}>
@@ -69,43 +79,56 @@ const UserHeaderLayout = inject(
               </Link>
             </Row>
           </Col>
-          <Col span={4}>
+          <Col span={6}>
             <Row className="justify-end items-center gap-x-2">
               <Search
                 placeholder="Nhập tên sản phẩm tìm kiếm..."
                 allowClear
                 size="small"
                 style={{ width: "200px" }}
+                onSearch={onSearch}
               />
               <Dropdown
                 trigger={["hover"]}
                 overlay={
                   <>
                     {authenticationStore.isAuthenticated ? (
-                      <>
-                        <Menu>
-                          <Menu.Item>Đơn Hàng</Menu.Item>
+                      <Menu>
+                        <Menu.Item
+                          onClick={() =>
+                            navigate(`/${appLayouts.purchase.path}`)
+                          }
+                        >
+                          Đơn Hàng
+                        </Menu.Item>
 
-                          <Menu.Item onClick={authenticationStore.logout}>
-                            Đăng Xuất
-                          </Menu.Item>
-                        </Menu>
-                      </>
+                        <Menu.Item onClick={authenticationStore.logout}>
+                          Đăng Xuất
+                        </Menu.Item>
+                      </Menu>
                     ) : (
-                      <Menu>Đăng Nhập</Menu>
+                      <Menu>
+                        <Menu.Item
+                          onClick={() =>
+                            navigate(`auth/${authLayouts.login.path}`)
+                          }
+                        >
+                          Đăng Nhập
+                        </Menu.Item>
+                      </Menu>
                     )}
                   </>
                 }
               >
                 <UserOutlined
                   className="text-lg"
-                  onClick={() => props.navigate("")}
+                  onClick={() => navigate(appLayouts.purchase.path)}
                 />
               </Dropdown>
               <Badge count={orderStore.shoppingCart.length} size="small">
                 <ShoppingCartOutlined
                   className="text-lg"
-                  onClick={() => props.navigate("cart")}
+                  onClick={() => navigate(appLayouts.cart.path)}
                 />
               </Badge>
             </Row>

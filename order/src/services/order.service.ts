@@ -15,7 +15,6 @@ class OrderService {
   }
 
   async createAsync(input: CreateOrderInputDto) {
-    const date = Date();
     const productResponse: any = await axios.post(
       "http://localhost:8082/api/v1/products/createOrder",
       { products: input.products }
@@ -48,7 +47,11 @@ class OrderService {
 
       await this.orderDetailRepository.save(orderDetailEntity);
     }
-
+    const updateProductResponse: any = await axios.post(
+      "http://localhost:8082/api/v1/products/updateProduct",
+      { products: input.products }
+    );
+    if (!updateProductResponse.data.success) return null;
     return await this.getAsync(entity.id);
   }
 

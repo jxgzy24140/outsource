@@ -31,7 +31,7 @@ const Home = inject(
   Stores.OrderStore
 )(
   observer((props: IProps) => {
-    const { navigate, productStore, orderStore } = props;
+    const { productStore, orderStore } = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [isOpenModal, setIsOpenModal] = useState(false);
     const [product, setProduct] = useState<any>(null);
@@ -41,10 +41,11 @@ const Home = inject(
       const init = async () => {
         const typeId: any = searchParams.get("type");
         const keyword: any = searchParams.get("keyword");
+
         await productStore.getAll(currentPage, 10, typeId, keyword);
       };
       init();
-    }, [searchParams.get("type")]);
+    }, [searchParams.get("type"), searchParams.get("keyword")]);
 
     const onChange = (page) => {
       setCurrentPage(page);

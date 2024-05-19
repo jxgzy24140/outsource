@@ -41,8 +41,6 @@ class OrderStore {
   @action
   async updateOrder(id: number, input: IUpdateOrderInput) {
     const response = await orderService.updateOrder(id, input);
-    console.log(response);
-
     if (response && response.success && response.data) {
       this.editOrder = null;
       this.orders.items = this.orders?.items.map((item) => {
@@ -88,8 +86,7 @@ class OrderStore {
       }
 
       localStorage.setItem("userCart", JSON.stringify(parsedCart));
-      this.shoppingCart = [parsedCart];
-      return;
+      this.shoppingCart = parsedCart; // Chỉ cập nhật giá trị mà không tạo mảng mới
     } else {
       localStorage.setItem("userCart", JSON.stringify([newItem]));
       this.shoppingCart = [newItem];
@@ -128,15 +125,12 @@ class OrderStore {
   }
 
   @action
-  async createOrder(input: ICreateOrderInput) {
+  async createOrder(input: any) {
     const response = await orderService.createOrder(input);
-    if (response && response.data) {
-      this.editOrder = response.data;
-      if (input.paymentMethodId == 2) {
-      } else {
-        // window.location.href = `/${appLayouts.payment.path}?orderId=${createdOrder.orderId}&amount=${createdOrder.amount}&resultCode=0&type=1`;
-      }
-    } else this.editOrder = null;
+    if (response && response.success) {
+      return true;
+    }
+    return false;
   }
 
   @action

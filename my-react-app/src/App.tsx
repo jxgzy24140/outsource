@@ -16,10 +16,10 @@ const App = inject(
   Stores.OrderStore
 )((props: IProps) => {
   useEffect(() => {
-    // const getAuth = async () => {
-    //   await props.authenticationStore.getAuthentication();
-    // };
-    // getAuth();
+    const getAuth = async () => {
+      await props.authenticationStore.getAuthentication();
+    };
+    getAuth();
   }, []);
 
   return <Router />;

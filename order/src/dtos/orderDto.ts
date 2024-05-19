@@ -15,6 +15,9 @@ export class OrderDto {
   address!: string;
 
   @AutoMap()
+  phoneNumber!: string;
+
+  @AutoMap()
   orderStatusId!: number;
 
   @AutoMap()

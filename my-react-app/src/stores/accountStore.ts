@@ -56,7 +56,6 @@ class AccountStore {
   @action
   async updateUser(id: number, input: any) {
     const response: any = await accountService.updateUser(id, input);
-    console.log("response: ", response);
 
     if (response.success) {
       this.users.items = this.users.items.map((user: any) => {

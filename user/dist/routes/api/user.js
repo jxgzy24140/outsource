@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const user_service_1 = __importDefault(require("../../services/user.service"));
+const identityMiddleware_1 = require("../../middlewares/identityMiddleware");
 const router = express.Router();
 router.get("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
@@ -55,6 +56,14 @@ router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const result = yield user_service_1.default.updateUser(id, input);
     if (!result)
         return res.status(404).json({ success: false, message: "Updated failed!" });
+    return res
+        .status(200)
+        .json({ success: true, message: "Success", data: result });
+}));
+router.get("/currentLoginInformation", identityMiddleware_1.identityMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req["user"];
+    console.log("user: ", req["user"]);
+    const result = yield user_service_1.default.get(id);
     return res
         .status(200)
         .json({ success: true, message: "Success", data: result });

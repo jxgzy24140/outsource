@@ -25,6 +25,10 @@ __decorate([
 __decorate([
     (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
+], CreateOrderInputDto.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, classes_1.AutoMap)(),
+    __metadata("design:type", String)
 ], CreateOrderInputDto.prototype, "address", void 0);
 class OrderProducts {
 }

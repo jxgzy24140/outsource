@@ -10,6 +10,9 @@ export class CreateOrderInputDto {
   receivedName!: string;
 
   @AutoMap()
+  phoneNumber!: string;
+
+  @AutoMap()
   address!: string;
 }
 

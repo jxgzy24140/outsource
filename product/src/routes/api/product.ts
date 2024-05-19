@@ -63,10 +63,18 @@ router.put("/:id", async (req: any, res: any) => {
 
 router.post("/createOrder", async (req: any, res: any) => {
   const input = req.body;
-  console.log("INPUT: ", input);
 
-  const result = await productService.createOrder(input);
+  const result = await productService.createOrderAsync(input);
   if (!result) return res.status(200).json({ success: false });
   return res.status(200).json({ success: true });
 });
+
+router.post("/updateProduct", async (req: any, res: any) => {
+  const { products } = req.body;
+
+  const result = await productService.updateProductAsync(products);
+  if (!result) return res.status(200).json({ success: false });
+  return res.status(200).json({ success: true });
+});
+
 export default router;

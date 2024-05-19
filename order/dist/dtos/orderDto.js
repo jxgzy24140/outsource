@@ -32,6 +32,10 @@ __decorate([
 ], OrderDto.prototype, "address", void 0);
 __decorate([
     (0, classes_1.AutoMap)(),
+    __metadata("design:type", String)
+], OrderDto.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", Number)
 ], OrderDto.prototype, "orderStatusId", void 0);
 __decorate([

@@ -12,6 +12,13 @@ class AuthService {
 
     return response.data.result;
   }
+
+  async getCurrentLoginInformation() {
+    const response = await http.get(
+      "http://localhost:8081/api/v1/identity/currentLoginInformation"
+    );
+    return response.data;
+  }
 }
 
 export default new AuthService();

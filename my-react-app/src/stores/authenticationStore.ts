@@ -12,8 +12,18 @@ class AuthenticationStore {
 
   @action
   public async getAuthentication() {
-    if (sessionStorage.getItem("accessToken")) this.isAuthenticated = true;
-    else this.isAuthenticated = false;
+    if (sessionStorage.getItem("accessToken")) {
+      const result = await authService.getCurrentLoginInformation();
+      console.log(result);
+      
+      if (result.success) {
+        this.userProfile = result.data;
+        this.isAuthenticated = true;
+      } else {
+        this.userProfile = result.data;
+        this.isAuthenticated = true;
+      }
+    } else this.isAuthenticated = false;
   }
 
   @action
@@ -22,7 +32,7 @@ class AuthenticationStore {
     if (response && response.success && response.message) {
       sessionStorage.setItem("accessToken", response.message.accessToken);
       response.message.user.roleId == 1
-        ? (window.location.href = "/home")
+        ? (window.location.href = "/")
         : (window.location.href = "/admin");
       this.isAuthenticated = true;
       this.userProfile = response.message.user;

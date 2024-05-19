@@ -6,6 +6,12 @@ declare class IdentityService {
     createAccount(input: any): Promise<void>;
     updateAccount(input: any): Promise<void>;
     deleteAccount(input: any): Promise<void>;
+    getCurrentLoginInformation(id: any): Promise<{
+        id: any;
+        fullName: any;
+        email: any;
+        roleId: any;
+    }>;
 }
 declare const _default: IdentityService;
 export default _default;

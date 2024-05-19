@@ -15,7 +15,6 @@ const AdminDashboardLayout = () => {
       </Col>
       <Col span={20}>
         <Row className="flex-col">
-          <Col>{/* <AdminHeaderLayout /> */}</Col>
           <Col>
             <Content
               className="h-full min-h-full max-h-full"

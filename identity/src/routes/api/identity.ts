@@ -37,5 +37,15 @@ router.post("/deleteAccount", async (req: any, res: any) => {
   await identityService.deleteAccount(input);
   return res.status(200).json({ success: true });
 });
-
+router.get(
+  "/currentLoginInformation",
+  identityMiddleware,
+  async (req: any, res: any) => {
+    const { id } = req["user"];
+    const result = await identityService.getCurrentLoginInformation(id);
+    return res
+      .status(200)
+      .json({ success: true, message: "Success", data: result });
+  }
+);
 export default router;

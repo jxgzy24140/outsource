@@ -1,22 +1,11 @@
 import withRouter from "@/components/Layout/Router/withRouter";
 import Stores from "@/stores/storeIdentifier";
-import {
-  Col,
-  Space,
-  Table,
-  Popconfirm,
-  Button,
-  Row,
-  Modal,
-  Form,
-  Input,
-  Select,
-} from "antd";
+import { Col, Table, Row, Modal, Form, Select } from "antd";
 import { inject, observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { localeData, weekdays } from "moment";
 import dayjs from "dayjs";
-import { ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import OrderStore from "@/stores/orderStore";
 dayjs.extend(weekdays);
@@ -62,6 +51,11 @@ const columns = ({ getOrderDetail, onOrderStatusChange }) => [
     title: "Tên Người Nhận",
     dataIndex: "receivedName",
     key: "receivedName",
+  },
+  {
+    title: "Số Điện Thoại",
+    dataIndex: "phoneNumber",
+    key: "phoneNumber",
   },
   {
     title: "Địa Chỉ",
@@ -115,16 +109,7 @@ const columns = ({ getOrderDetail, onOrderStatusChange }) => [
     },
   },
 ];
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 14 },
-  },
-};
+
 interface IProps {
   orderStore: OrderStore;
   navigate: any;
@@ -133,13 +118,13 @@ interface IProps {
 const Order = inject(Stores.OrderStore)(
   observer((props: IProps) => {
     const { orderStore } = props;
-    const [pageNumber, setPageNumber] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const [pageNumber, _setPageNumber] = useState<number>(1);
+    const [pageSize, _setPageSize] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [orderDetails, setOrderDetails] = useState([]);
 
-    const [form] = Form.useForm();
-    const [editForm] = Form.useForm();
+    const [_form] = Form.useForm();
+    const [_editForm] = Form.useForm();
 
     useEffect(() => {
       const initValues = async () => {

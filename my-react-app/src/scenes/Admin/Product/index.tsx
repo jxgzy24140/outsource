@@ -18,11 +18,10 @@ import { inject, observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { localeData, weekdays } from "moment";
 import dayjs from "dayjs";
-import { adminLayouts } from "@/components/Layout/Router/router.config";
+// import { adminLayouts } from "@/components/Layout/Router/router.config";
 import { PlusOutlined } from "@ant-design/icons";
 import CategoryStore from "@/stores/categoryStore";
 import { toast } from "react-toastify";
-import axios from "axios";
 dayjs.extend(weekdays);
 dayjs.extend(localeData);
 
@@ -95,8 +94,8 @@ const columns = ({ productStore, handleOpenUpdateModal }) => [
     render: (_, record) => {
       const confirm = async () => {
         const result = await productStore.delete(record.id);
-        if (result) toast("Xóa sản phẩm thành công!")
-          else toast("Xóa sản phẩm thất bại!")
+        if (result) toast("Xóa sản phẩm thành công!");
+        else toast("Xóa sản phẩm thất bại!");
       };
       return (
         <Space size="middle">
@@ -130,20 +129,15 @@ interface IProps {
   categoryStore: CategoryStore;
   navigate: any;
 }
-const options = [
-  { label: "1", value: 1 },
-  { label: "5", value: 5 },
-  { label: "10", value: 10 },
-  { label: "20", value: 20 },
-];
+
 const Product = inject(
   Stores.ProductStore,
   Stores.CategoryStore
 )(
   observer((props: IProps) => {
-    const { productStore, categoryStore, navigate } = props;
-    const [pageNumber, setPageNumber] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const { productStore, categoryStore } = props;
+    const [pageNumber, _setPageNumber] = useState<number>(1);
+    const [pageSize, _setPageSize] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 

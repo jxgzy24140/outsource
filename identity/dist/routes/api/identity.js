@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const identity_service_1 = __importDefault(require("../../services/identity.service"));
+const identityMiddleware_1 = require("../../middlewares/identityMiddleware");
 const router = express.Router();
 router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const input = req.body;
@@ -44,5 +45,12 @@ router.post("/deleteAccount", (req, res) => __awaiter(void 0, void 0, void 0, fu
     const input = req.body;
     yield identity_service_1.default.deleteAccount(input);
     return res.status(200).json({ success: true });
+}));
+router.get("/currentLoginInformation", identityMiddleware_1.identityMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req["user"];
+    const result = yield identity_service_1.default.getCurrentLoginInformation(id);
+    return res
+        .status(200)
+        .json({ success: true, message: "Success", data: result });
 }));
 exports.default = router;

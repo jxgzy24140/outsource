@@ -125,7 +125,7 @@ class ProductService {
     }
   }
 
-  async createOrder(input: any) {
+  async createOrderAsync(input: any) {
     for (let i = 0; i < input.length; i++) {
       const entity = await this.repository.findOne({
         where: {
@@ -137,6 +137,24 @@ class ProductService {
       if (!entity) return null;
     }
     return true;
+  }
+
+  async updateProductAsync(input: any) {
+    try {
+      for (let i = 0; i < input.length; i++) {
+        const { id, quantity } = input[i];
+        const entity: any = await this.repository.findOne({
+          where: {
+            id,
+          },
+        });
+        entity.quantity -= quantity;
+        await this.repository.save(entity);
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

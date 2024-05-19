@@ -14,15 +14,26 @@ import {
 import { CloseOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AuthenticationStore from "@/stores/authenticationStore";
+import {
+  appLayouts,
+  authLayouts,
+} from "@/components/Layout/Router/router.config";
+import withRouter from "@/components/Layout/Router/withRouter";
+import { toast } from "react-toastify";
 const { TextArea } = Input;
 interface IProps {
   navigate: any;
   orderStore: OrderStore;
+  authenticationStore: AuthenticationStore;
 }
 
-const Cart = inject(Stores.OrderStore)(
+const Cart = inject(
+  Stores.OrderStore,
+  Stores.AuthenticationStore
+)(
   observer((props: IProps) => {
-    const { orderStore } = props;
+    const { navigate, orderStore, authenticationStore } = props;
     const [provinces, setProvinces] = useState<any>([]);
     const [province, setProvince] = useState<any>(null);
     const [districts, setDistricts] = useState<any>([]);
@@ -115,40 +126,42 @@ const Cart = inject(Stores.OrderStore)(
     const getProducts = () => {
       const products: any = [];
       orderStore.shoppingCart.map((item: any) => {
-        products.push({
-          id: item.id,
-          quantity: item.quantity,
-        });
+        products.push(item);
       });
       return products;
     };
 
     const onFinish = async (values: any) => {
-      values.province = provinces.find((x) => x.value == values.province).label;
-      values.district = districts.find((x) => x.value == values.district).label;
-      values.ward = wards.find((x) => x.value == values.ward).label;
+      if (!authenticationStore.isAuthenticated)
+        return navigate(`/auth/${authLayouts.login.path}`);
+      values.province = provinces.find(
+        (x: any) => x.value == values.province
+      ).label;
+      values.district = districts.find(
+        (x: any) => x.value == values.district
+      ).label;
+      values.ward = wards.find((x: any) => x.value == values.ward).label;
+      const address = `${values.addressDetail} - ${values.ward} - ${values.district} - ${values.province}`;
       const products = getProducts();
-      const newOrder = {
-        ...values,
-        paymentMethodId: values.paymentMethodId,
-        products,
-        shippingFee: 0,
-        amount: 0,
-        userId: "0",
+      const input = {
+        address,
+        receivedName: values.receivedName,
+        phoneNumber: values.phoneNumber,
+        userId: authenticationStore.userProfile?.id,
+        products: products,
       };
-      await orderStore.createOrder(newOrder);
+      const result = await orderStore.createOrder(input);
+      if (result) toast("Tạo đơn hàng thành công!");
+      else toast("Tạo đơn hàng thất bại!");
+      form.resetFields();
+      localStorage.removeItem("userCart");
+      navigate(appLayouts.home.path);
     };
     return (
       <Row className="p-5 gap-3">
         <Col span={14} className="flex flex-col gap-2">
           <Row>
-            <Form
-              form={form}
-              onFinish={onFinish}
-              labelCol={{ span: 10 }}
-              wrapperCol={{ span: 14 }}
-              className="w-full"
-            >
+            <Form form={form} onFinish={onFinish} className="w-full">
               <Row className="py-2 text-2xl font-semibold">
                 THÔNG TIN VẬN CHUYỂN
               </Row>
@@ -156,7 +169,7 @@ const Cart = inject(Stores.OrderStore)(
                 <Col span={10} className="w-full min-w-full">
                   <Form.Item
                     className="w-full min-w-full"
-                    name="receiveName"
+                    name="receivedName"
                     rules={[
                       {
                         required: true,
@@ -190,7 +203,7 @@ const Cart = inject(Stores.OrderStore)(
                 </Col>
               </Row>
 
-              <Row className="flex-wrap">
+              <Row className="gap-x-2">
                 <Col span={8} className="flex-1">
                   <Form.Item
                     className="flex-grow"
@@ -206,6 +219,7 @@ const Cart = inject(Stores.OrderStore)(
                       className="w-full"
                       options={provinces && provinces}
                       onChange={(value) => handleChangeProvice(value)}
+                      placeholder="Chọn tỉnh/thành phố"
                     />
                   </Form.Item>
                 </Col>
@@ -219,6 +233,7 @@ const Cart = inject(Stores.OrderStore)(
                     <Select
                       options={districts && districts}
                       onChange={(value) => handleChangeDistrict(value)}
+                      placeholder="Chọn quận/huyện"
                     />
                   </Form.Item>
                 </Col>
@@ -229,7 +244,10 @@ const Cart = inject(Stores.OrderStore)(
                       { required: true, message: "Vui lòng chọn phường/xã" },
                     ]}
                   >
-                    <Select options={wards && wards} />
+                    <Select
+                      options={wards && wards}
+                      placeholder="Chọn phường/xã"
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -242,23 +260,7 @@ const Cart = inject(Stores.OrderStore)(
                   },
                 ]}
               >
-                <TextArea />
-              </Form.Item>
-              <Form.Item name="paymentMethodId">
-                <Select
-                  options={[
-                    { value: 1, label: "COD" },
-                    { value: 2, label: "Momo" },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item name="shippingMethodId">
-                <Select
-                  options={[
-                    { value: 1, label: "GHTK" },
-                    { value: 2, label: "GHN" },
-                  ]}
-                />
+                <TextArea placeholder="Địa chỉ chi tiết" />
               </Form.Item>
               <Form.Item style={{ display: "none" }}>
                 <Button htmlType="submit" id="submit-btn">
@@ -272,17 +274,13 @@ const Cart = inject(Stores.OrderStore)(
             <p>Thành tiền: </p>
             <p>{orderStore.getTotalShoppingCart().toLocaleString()} đ</p>
           </Row>
-          <Divider />
-          <Row className="justify-between items-center">
-            <p>Thành tiền: </p>
-            <p>{orderStore.getTotalShoppingCart().toLocaleString()} đ</p>
-          </Row>
           <Row>
             <Button
               onClick={() => document.getElementById("submit-btn")?.click()}
-              className="w-full flex justify-center items-center px-5 py-2 text-white bg-[#FFAC00]"
+              type="text"
+              className="w-full flex justify-center items-center px-5 py-2 text-white bg-[#626262] rounded-none"
             >
-              Thanh toán
+              Đặt Hàng
             </Button>
           </Row>
         </Col>
@@ -369,4 +367,4 @@ const Cart = inject(Stores.OrderStore)(
   })
 );
 
-export default Cart;
+export default withRouter(Cart);

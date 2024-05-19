@@ -1,6 +1,7 @@
 import { inject, observer } from "mobx-react";
 import Stores from "@/stores/storeIdentifier";
 import { Col } from "antd";
+import { NavLink } from "react-router-dom";
 
 interface IProps {}
 const Sidebar = inject(Stores.ProductStore)(
@@ -13,25 +14,40 @@ const Sidebar = inject(Stores.ProductStore)(
           </h3>
           <ul className="mb-6 flex flex-col">
             <li className="mb-1.5">
-              <a className="flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700 ">
-                <span className="flex items-center">Home Page</span>
-              </a>
-            </li>
-
-            <li className="mb-1.5">
-              <a className="flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700">
+              <NavLink
+                to="/admin/accounts"
+                className={({ isActive }) =>
+                  `flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700 ${
+                    isActive ? "bg-gray-700" : ""
+                  }`
+                }
+              >
                 <span className="flex items-center mr-4">Account</span>
-              </a>
+              </NavLink>
             </li>
             <li className="mb-1.5">
-              <a className="flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700">
-                <span className="flex items-center">Product</span>
-              </a>
+              <NavLink
+                to="/admin/products"
+                className={({ isActive }) =>
+                  `flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700 ${
+                    isActive ? "bg-gray-700" : ""
+                  }`
+                }
+              >
+                <span className="flex items-center mr-4">Product</span>
+              </NavLink>
             </li>
             <li className="mb-1.5">
-              <a className="flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700">
-                <span className="flex items-center">Orders</span>
-              </a>
+              <NavLink
+                to="/admin/orders"
+                className={({ isActive }) =>
+                  `flex items-center rounded-sm px-4 py-2 font-medium text-gray-200 duration-300 ease-in-out hover:bg-gray-700 ${
+                    isActive ? "bg-gray-700" : ""
+                  }`
+                }
+              >
+                <span className="flex items-center mr-4">Orders</span>
+              </NavLink>
             </li>
           </ul>
         </div>

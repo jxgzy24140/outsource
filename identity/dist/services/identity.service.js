@@ -44,7 +44,7 @@ class IdentityService {
                 };
                 const tokenSecretKey = (_a = process.env.TOKEN_SECRET_KEY) !== null && _a !== void 0 ? _a : "";
                 const accessToken = jsonwebtoken_1.default.sign(payload, tokenSecretKey, {
-                    expiresIn: "1h",
+                    expiresIn: "72h",
                 });
                 return {
                     success: true,
@@ -98,6 +98,19 @@ class IdentityService {
                 account.updatedDate = new Date(Date());
             }
             yield this.accountRepository.save(account);
+        });
+    }
+    getCurrentLoginInformation(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const account = yield this.accountRepository.findOne({
+                where: { userId: id },
+            });
+            return {
+                id: account.userId,
+                fullName: account.fullName,
+                email: account.email,
+                roleId: account.roleId,
+            };
         });
     }
 }

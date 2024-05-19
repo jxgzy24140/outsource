@@ -12,7 +12,8 @@ declare class ProductService {
         currentPage: number;
         pageSize: number;
     }>;
-    createOrder(input: any): Promise<true | null>;
+    createOrderAsync(input: any): Promise<true | null>;
+    updateProductAsync(input: any): Promise<boolean>;
 }
 declare const _default: ProductService;
 export default _default;

@@ -128,7 +128,7 @@ class ProductService {
             }
         });
     }
-    createOrder(input) {
+    createOrderAsync(input) {
         return __awaiter(this, void 0, void 0, function* () {
             for (let i = 0; i < input.length; i++) {
                 const entity = yield this.repository.findOne({
@@ -142,6 +142,26 @@ class ProductService {
                     return null;
             }
             return true;
+        });
+    }
+    updateProductAsync(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                for (let i = 0; i < input.length; i++) {
+                    const { id, quantity } = input[i];
+                    const entity = yield this.repository.findOne({
+                        where: {
+                            id,
+                        },
+                    });
+                    entity.quantity -= quantity;
+                    yield this.repository.save(entity);
+                }
+                return true;
+            }
+            catch (_a) {
+                return false;
+            }
         });
     }
 }

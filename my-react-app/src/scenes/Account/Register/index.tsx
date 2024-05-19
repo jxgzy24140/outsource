@@ -4,6 +4,7 @@ import accountService from "@/services/account/accountService";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { authLayouts } from "@/components/Layout/Router/router.config";
 
 interface IProps {
   navigate: any;
@@ -108,7 +109,7 @@ const Register = (props: IProps) => {
           </Form.Item>
           <span className="text-[#1a1a1a] py-4">
             Bạn đã có tài khoản?{" "}
-            <Link to={"login"}>
+            <Link to={`/auth/${authLayouts.login.path}`}>
               <u>Đăng nhập</u>
             </Link>
           </span>

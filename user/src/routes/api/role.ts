@@ -4,7 +4,6 @@ import roleService from "../../services/role.service";
 const router = express.Router();
 
 router.get("/:id", async (req: express.Request, res) => {
-  console.log(req.params);
   const { id }: any = req.params;
   try {
     const role = await roleService.get(id);

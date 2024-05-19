@@ -5,6 +5,7 @@ import withRouter from "@/components/Layout/Router/withRouter";
 import AuthenticationStore from "@/stores/authenticationStore";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { authLayouts } from "@/components/Layout/Router/router.config";
 
 interface IProps {
   navigate: any;
@@ -16,8 +17,6 @@ const Login = inject(Stores.AuthenticationStore)(
     const [isLoading, setIsLoading] = useState(false);
     const onFinish = async (values: any) => {
       setIsLoading(true);
-      console.log("values: ", values);
-
       await authenticationStore.login(values);
       setIsLoading(false);
     };
@@ -71,7 +70,7 @@ const Login = inject(Stores.AuthenticationStore)(
             </Form.Item>
             <span className="text-[#1a1a1a] py-4">
               Thành viên mới?{" "}
-              <Link to={"login"}>
+              <Link to={`/auth/${authLayouts.register.path}`}>
                 <u>Tạo tài khoản</u>
               </Link>
             </span>

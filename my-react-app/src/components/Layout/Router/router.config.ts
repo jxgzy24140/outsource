@@ -16,7 +16,7 @@ export const adminLayouts: any = {
 
 export const appLayouts: any = {
   home: {
-    path: "home",
+    path: "",
     component: lazy(() => import("@/scenes/Home")),
   },
   cart: {
@@ -26,10 +26,6 @@ export const appLayouts: any = {
   purchase: {
     path: "purchase",
     component: lazy(() => import("@/scenes/Account/Profile/Order")),
-  },
-  order: {
-    path: "purchase/order/:id",
-    component: lazy(() => import("@/scenes/Account/Profile/OrderDetail")),
   },
 };
 
@@ -42,8 +38,8 @@ export const authLayouts: any = {
     path: "register",
     component: lazy(() => import("@/scenes/Account/Register")),
   },
-  verify: {
-    path: "verify",
-    component: lazy(() => import("@/scenes/Account/Verify")),
-  },
+  // verify: {
+  //   path: "verify",
+  //   component: lazy(() => import("@/scenes/Account/Verify")),
+  // },
 };

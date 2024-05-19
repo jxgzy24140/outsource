@@ -4,6 +4,7 @@ export declare class Order {
     id: number;
     userId: number;
     receivedName: string;
+    phoneNumber: string;
     address: string;
     orderStatusId: number;
     createdDate: Date;

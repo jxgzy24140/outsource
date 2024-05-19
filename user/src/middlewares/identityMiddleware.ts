@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 export function identityMiddleware(req: any, res: any, next: any) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader?.split(" ")[1];
-  console.log("token: ", token);
 
   if (!token) return res.status(401);
   else {

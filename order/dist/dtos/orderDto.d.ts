@@ -4,6 +4,7 @@ export declare class OrderDto {
     userId: number;
     receivedName: string;
     address: string;
+    phoneNumber: string;
     orderStatusId: number;
     orderStatusName: string;
     createdDate: Date;

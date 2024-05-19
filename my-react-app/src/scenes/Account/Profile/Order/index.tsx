@@ -3,7 +3,7 @@ import OrderStore from "@/stores/orderStore";
 import Stores from "@/stores/storeIdentifier";
 import { Col, Divider, Row } from "antd";
 import { inject, observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 interface IProps {
   navigate: any;
   orderStore: OrderStore;

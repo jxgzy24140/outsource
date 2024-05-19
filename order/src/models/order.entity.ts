@@ -25,6 +25,10 @@ export class Order {
 
   @AutoMap()
   @Column()
+  phoneNumber!: string;
+
+  @AutoMap()
+  @Column()
   address!: string;
 
   @AutoMap()

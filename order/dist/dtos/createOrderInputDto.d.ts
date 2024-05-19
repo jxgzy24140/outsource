@@ -2,6 +2,7 @@ export declare class CreateOrderInputDto {
     products: OrderProducts[];
     userId: number;
     receivedName: string;
+    phoneNumber: string;
     address: string;
 }
 declare class OrderProducts {

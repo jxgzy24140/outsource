@@ -65,8 +65,14 @@ router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 }));
 router.post("/createOrder", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const input = req.body;
-    console.log("INPUT: ", input);
-    const result = yield product_service_1.default.createOrder(input);
+    const result = yield product_service_1.default.createOrderAsync(input);
+    if (!result)
+        return res.status(200).json({ success: false });
+    return res.status(200).json({ success: true });
+}));
+router.post("/updateProduct", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { products } = req.body;
+    const result = yield product_service_1.default.updateProductAsync(products);
     if (!result)
         return res.status(200).json({ success: false });
     return res.status(200).json({ success: true });
