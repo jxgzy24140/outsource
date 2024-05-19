@@ -1,26 +1,31 @@
+import { AutoMap } from "@automapper/classes";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { Role } from "./role.entity";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ unique: true })
+  userId!: number;
+
+  @Column({ nullable: false })
   roleId!: number;
 
-  @Column({ length: 15, nullable: false })
-  firstName!: string;
-
-  @Column({ length: 15, nullable: false })
-  lastName!: string;
-
+  @Column({ nullable: false })
+  fullName!: string;
   @Column({ nullable: false })
   email!: string;
 
   @Column({ nullable: false })
   password!: string;
 
-  @ManyToOne(() => Role)
-  role!: Role;
+  @Column({ nullable: false })
+  createdDate!: Date;
+
+  @Column({ nullable: true })
+  updatedDate?: Date;
+
+  @Column({ nullable: false })
+  isDeleted!: boolean;
 }

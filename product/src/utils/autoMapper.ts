@@ -2,14 +2,17 @@ import {
   MappingProfile,
   createMap,
   forMember,
-  ignore,
   mapFrom,
   addProfile,
   createMapper,
 } from "@automapper/core";
 import { classes } from "@automapper/classes";
 import { Product } from "../models/product.entity";
-import { ProductDto } from "../dtos/product";
+import {
+  CreateProductInputDto,
+  ProductDto,
+  UpdateProductInputDto,
+} from "../dtos/product";
 
 const userProfile: MappingProfile = (mapper: any) => {
   createMap(
@@ -18,9 +21,12 @@ const userProfile: MappingProfile = (mapper: any) => {
     ProductDto,
     forMember(
       (dest: any) => dest.categoryName,
-      mapFrom((x: any) => x.category.cateogryName)
+      mapFrom((x: any) => x.category.categoryName)
     )
   );
+
+  createMap(mapper, UpdateProductInputDto, Product);
+  createMap(mapper, CreateProductInputDto, Product);
 };
 
 const mapper = createMapper({

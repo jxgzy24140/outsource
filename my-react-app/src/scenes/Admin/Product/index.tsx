@@ -13,8 +13,6 @@ import {
   Form,
   Input,
   InputNumber,
-  Upload,
-  Switch,
 } from "antd";
 import { inject, observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
@@ -24,31 +22,27 @@ import { adminLayouts } from "@/components/Layout/Router/router.config";
 import { PlusOutlined } from "@ant-design/icons";
 import CategoryStore from "@/stores/categoryStore";
 import { toast } from "react-toastify";
+import axios from "axios";
 dayjs.extend(weekdays);
 dayjs.extend(localeData);
 
-const columns = ({ productStore, navigate }) => [
+const columns = ({ productStore, handleOpenUpdateModal }) => [
   {
-    title: "#",
-    render: (record: any) => <p> {record.productId}</p>,
+    title: "Mã Sản Phẩm",
+    render: (record: any) => <p> {record.id}</p>,
   },
   {
-    title: "Category Name",
+    title: "Tên Danh Mục",
     dataIndex: "categoryName",
     key: "CategoryName",
   },
   {
-    title: "Product Name",
+    title: "Tên Sản Phẩm",
     dataIndex: "productName",
     key: "ProductName",
   },
   {
-    title: "Product Code",
-    dataIndex: "productCode",
-    key: "ProductCode",
-  },
-  {
-    title: "Image",
+    title: "Hình Ảnh",
     dataIndex: "image",
     key: "image",
     render: (image) => (
@@ -60,46 +54,21 @@ const columns = ({ productStore, navigate }) => [
     ),
   },
   {
-    title: "Price",
+    title: "Giá Bán",
     dataIndex: "price",
     key: "Price",
   },
   {
-    title: "Discount",
-    dataIndex: "discount",
-    key: "Discount",
-  },
-  {
-    title: "Quantity",
+    title: "Số Lượng",
     key: "Quantity",
     render: (record: any) => {
       if (record.quantity != 0)
-        return (
-          <p className="px-2 py-1 bg-blue-500 text-white  text-center">
-            {record.quantity}
-          </p>
-        );
-      return (
-        <p className="px-2 py-1 bg-red-500 text-white text-center">Hết hàng!</p>
-      );
+        return <p className="px-2 py-1 text-center">{record.quantity}</p>;
+      return <p className="px-2 py-1 text-center">Hết hàng!</p>;
     },
   },
   {
-    title: "In Stock",
-    key: "InStock",
-    render: (record: any) => {
-      const bgColorClass = record.inStock ? "bg-blue-500" : "bg-red-500";
-      const classNames = `px-2 py-1 text-white text-center ${bgColorClass}`;
-      return <p className={classNames}>{record.inStock ? "Yes" : "No"}</p>;
-    },
-  },
-  {
-    title: "Creator",
-    dataIndex: "creatorName",
-    key: "CreatorName",
-  },
-  {
-    title: "Created Date",
+    title: "Ngày Tạo",
     key: "createdDate",
     render: (record: any) => (
       <p>
@@ -110,8 +79,8 @@ const columns = ({ productStore, navigate }) => [
     ),
   },
   {
-    title: "Last Updated",
-    key: "LastUpdated",
+    title: "Cập nhật lần cuối",
+    key: "updatedDate",
     render: (record: any) => (
       <p>
         {record.updatedDate != null
@@ -121,26 +90,17 @@ const columns = ({ productStore, navigate }) => [
     ),
   },
   {
-    title: "Action",
+    title: "Hành Động",
     key: "action",
     render: (_, record) => {
       const confirm = async () => {
-        await productStore.delete(record.productId);
+        const result = await productStore.delete(record.id);
+        if (result) toast("Xóa sản phẩm thành công!")
+          else toast("Xóa sản phẩm thất bại!")
       };
       return (
         <Space size="middle">
-          <a
-            onClick={() =>
-              navigate(
-                adminLayouts.product.path.replace(
-                  "products/:id",
-                  record.productId
-                )
-              )
-            }
-          >
-            Edit
-          </a>
+          <a onClick={() => handleOpenUpdateModal(record.id)}>Chỉnh sửa</a>
           <Popconfirm
             title="Xóa sản phẩm"
             description="Bạn có chắc sẽ xóa sản phẩm này?"
@@ -148,7 +108,7 @@ const columns = ({ productStore, navigate }) => [
             okText="Có"
             cancelText="Hủy"
           >
-            <Button danger>Delete</Button>
+            <Button danger>Xóa</Button>
           </Popconfirm>
         </Space>
       );
@@ -185,8 +145,11 @@ const Product = inject(
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [fileList, setFileList] = useState<any[]>([]);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
     const [form] = Form.useForm();
+    const [editForm] = Form.useForm();
+
     useEffect(() => {
       initValue();
     }, []);
@@ -196,67 +159,36 @@ const Product = inject(
     };
 
     const handleOpenCreateModal = async () => {
-      await Promise.all([categoryStore.getAll(1, 10)]);
+      await categoryStore.getAll();
       form.setFieldsValue({
-        id: categoryStore?.categories?.items[0]?.id,
-        inStock: true,
+        categoryId: 1,
+        size: 40,
+        typeId: 1,
       });
       productStore.createProduct();
       setIsModalOpen(true);
     };
 
-    const onChange = (values: any) => {
-      if (values.file.status == "removed") setFileList([]);
-      if (values.file.status == "uploading")
-        setFileList([
-          {
-            uid: "-1",
-            name: values.file.name,
-            status: "done",
-            url: URL.createObjectURL(values.file.originFileObj),
-            originFileObj: values.file.originFileObj,
-          },
-        ]);
-    };
-
-    const onPreview = async (file: any) => {
-      let src = file.url as string;
-      if (!src) {
-        src = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file.originFileObj as any);
-          reader.onload = () => resolve(reader.result as string);
-        });
-      }
-      const image = new Image();
-      image.src = src;
-      const imgWindow = window.open(src);
-      imgWindow?.document.write(image.outerHTML);
-    };
-
-    const onRemove = (values: any) => {
-      setFileList([]);
-    };
-
     const onFinish = async (values: any) => {
-      if (fileList[0]?.originFileObj) {
-        values.imageFile = fileList[0]?.originFileObj;
-      }
-      const payload = {
-        ...values,
-        creationId: 0,
-        imageFile: fileList[0]?.originFileObj,
-      };
-      const result: any = await productStore.create(payload);
-      if (result) {
-        toast.success("Thêm sản phẩm thành công!", {
-          autoClose: 2000,
-        });
-        setTimeout(() => setIsModalOpen(false), 2500);
-      } else
-        toast.error(`Thêm sản phẩm thất bại!, ${result.message}`, {
-          delay: 2000,
-        });
+      const result = await productStore.create(values);
+      form.resetFields();
+      if (result) toast("Thêm mới sản phẩm thành công!");
+      else toast("Thêm sản phẩm thất bại!");
+      setIsModalOpen(false);
+    };
+
+    const handleOpenUpdateModal = async (id: any) => {
+      await Promise.all([productStore.get(id), categoryStore.getAll()]);
+      editForm.setFieldsValue(productStore.editProduct);
+      setIsUpdateModalOpen(true);
+    };
+
+    const onUpdateFinish = async (values: any) => {
+      const result = await productStore.update(values.id, values);
+      if (!result) toast("Chỉnh sửa thất bại!");
+      else toast("Chỉnh sửa thành công!");
+      form.resetFields();
+      setIsUpdateModalOpen(false);
     };
 
     const handleOk = () => {
@@ -266,30 +198,35 @@ const Product = inject(
     return (
       <Col className="mx-auto h-full">
         <Row className="justify-between items-center py-2">
-          <Select
-            options={options}
-            defaultValue="10"
-            onChange={(value: any) => setPageSize(value)}
-          />
-          <Button
-            type="primary"
-            className="flex justify-center items-center"
-            onClick={handleOpenCreateModal}
-          >
-            Thêm mới <PlusOutlined />
-          </Button>
+          <div className="w-full flex justify-end items-center mr-2">
+            <Button
+              type="text"
+              className="flex justify-center items-center bg-[#626262] text-white rounded-none"
+              onClick={handleOpenCreateModal}
+            >
+              Thêm mới <PlusOutlined />
+            </Button>
+          </div>
         </Row>
         <Table
-          columns={columns({ productStore, navigate })}
-          dataSource={
-            productStore?.products?.items ?? productStore?.products?.items
-          }
+          columns={columns({ productStore, handleOpenUpdateModal })}
+          dataSource={productStore?.products?.items}
           pagination={{ pageSize: pageSize }}
         />
         <Modal
           title="Thêm sản phẩm mới"
           open={isModalOpen}
           onCancel={() => setIsModalOpen(false)}
+          footer={[
+            <Button
+              key="1"
+              type="text"
+              onClick={() => document.getElementById("submit-btn")?.click()}
+              className="bg-[#626262] text-white rounded-none"
+            >
+              Thêm
+            </Button>,
+          ]}
           onOk={handleOk}
         >
           <Form
@@ -300,112 +237,176 @@ const Product = inject(
             style={{ maxWidth: 600 }}
           >
             <Form.Item
-              label="Product Name"
+              label="Tên sản phẩm"
               name="productName"
-              rules={[{ required: true, message: "Please input!" }]}
+              rules={[{ required: true, message: "Nhập tên sản phẩm!" }]}
             >
               <Input />
             </Form.Item>
 
             <Form.Item
-              label="Product Code"
-              name="productCode"
-              rules={[{ required: true, message: "Please input!" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Category"
+              label="Hãng"
               name="categoryId"
               rules={[{ required: true }]}
             >
               <Select
-                options={categoryStore?.categories?.items.map((item) => ({
+                options={categoryStore?.categories?.map((item) => ({
                   value: item.id,
                   label: item.categoryName,
                 }))}
-                defaultValue={1}
               />
             </Form.Item>
 
             <Form.Item
-              label="Brand"
-              name="brandId"
-              rules={[{ required: true }]}
-            >
-              <Select
-                options={categoryStore?.categories?.items.map((item) => ({
-                  value: item.id,
-                  label: item.categoryName,
-                }))}
-                defaultValue={1}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Description"
-              name="description"
-              rules={[{ required: true, message: "Please input!" }]}
-            >
-              <Input.TextArea />
-            </Form.Item>
-
-            <Form.Item label="Upload" valuePropName="fileList">
-              <Upload
-                action="/upload.do"
-                listType="picture-card"
-                fileList={fileList}
-                onChange={onChange}
-                onPreview={onPreview}
-                onRemove={onRemove}
-              >
-                {fileList.length === 0 ? (
-                  <button
-                    style={{ border: 0, background: "none" }}
-                    type="button"
-                  >
-                    <PlusOutlined />
-                    <div style={{ marginTop: 8 }}>Upload</div>
-                  </button>
-                ) : null}
-              </Upload>
-            </Form.Item>
-
-            <Form.Item
-              label="Price"
+              label="Giá bán"
               name="price"
-              rules={[{ required: true, message: "Please input!" }]}
+              rules={[{ required: true, message: "Nhập giá bán!" }]}
             >
               <InputNumber style={{ width: "100%" }} min={1} />
             </Form.Item>
 
             <Form.Item
-              label="Discount (%)"
-              name="discount"
-              rules={[{ required: true, message: "Please input!" }]}
-            >
-              <Input
-                type="number"
-                style={{ width: "100%" }}
-                min={0}
-                max={100}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Quantity"
+              label="Số lượng"
               name="quantity"
-              rules={[{ required: true, message: "Please input!" }]}
+              rules={[{ required: true, message: "Nhập số lượng!" }]}
             >
               <Input style={{ width: "100%" }} min={0} />
             </Form.Item>
 
-            <Form.Item name="inStock" label="In Stock">
-              <Switch defaultChecked />
+            <Form.Item
+              label="Kích thước"
+              name="size"
+              rules={[{ required: true }]}
+            >
+              <Select
+                options={[
+                  { value: 40, label: "40 mm" },
+                  { value: 42, label: "42 mm" },
+                  { value: 44, label: "44 mm" },
+                ]}
+              ></Select>
             </Form.Item>
+
+            <Form.Item label="Loại" name="typeId" rules={[{ required: true }]}>
+              <Select
+                options={[
+                  { value: 1, label: "NAM" },
+                  { value: 2, label: "NỮ" },
+                ]}
+              ></Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Hình ảnh"
+              name="image"
+              rules={[{ required: true }]}
+            >
+              <Input style={{ width: "100%" }} />
+            </Form.Item>
+
             <Form.Item style={{ display: "none" }}>
               <Button htmlType="submit" id="submit-btn">
+                Lưu thay đổi
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+        <Modal
+          title="Chỉnh sửa sản phẩm"
+          open={isUpdateModalOpen}
+          onCancel={() => setIsUpdateModalOpen(false)}
+          footer={[
+            <Button
+              key="1"
+              type="text"
+              onClick={() => document.getElementById("update-btn")?.click()}
+              className="bg-[#626262] text-white rounded-none"
+            >
+              Lưu Thay Đổi
+            </Button>,
+          ]}
+          onOk={handleOk}
+        >
+          <Form
+            {...formItemLayout}
+            form={editForm}
+            onFinish={onUpdateFinish}
+            variant="filled"
+            style={{ maxWidth: 600 }}
+          >
+            <Form.Item name="id" style={{ display: "none" }}>
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Tên sản phẩm"
+              name="productName"
+              rules={[{ required: true, message: "Nhập tên sản phẩm!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Hãng"
+              name="categoryId"
+              rules={[{ required: true }]}
+            >
+              <Select
+                options={categoryStore?.categories?.map((item) => ({
+                  value: item.id,
+                  label: item.categoryName,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Giá bán"
+              name="price"
+              rules={[{ required: true, message: "Nhập giá bán!" }]}
+            >
+              <InputNumber style={{ width: "100%" }} min={1} />
+            </Form.Item>
+
+            <Form.Item
+              label="Số lượng"
+              name="quantity"
+              rules={[{ required: true, message: "Nhập số lượng!" }]}
+            >
+              <Input style={{ width: "100%" }} min={0} />
+            </Form.Item>
+
+            <Form.Item
+              label="Kích thước"
+              name="size"
+              rules={[{ required: true }]}
+            >
+              <Select
+                options={[
+                  { value: 40, label: "40 mm" },
+                  { value: 42, label: "42 mm" },
+                  { value: 44, label: "44 mm" },
+                ]}
+              ></Select>
+            </Form.Item>
+
+            <Form.Item label="Loại" name="typeId" rules={[{ required: true }]}>
+              <Select
+                options={[
+                  { value: 1, label: "NAM" },
+                  { value: 2, label: "NỮ" },
+                ]}
+              ></Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Hình ảnh"
+              name="image"
+              rules={[{ required: true }]}
+            >
+              <Input style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item style={{ display: "none" }}>
+              <Button htmlType="submit" id="update-btn">
                 Lưu thay đổi
               </Button>
             </Form.Item>

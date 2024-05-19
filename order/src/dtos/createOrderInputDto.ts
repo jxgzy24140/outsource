@@ -1,11 +1,22 @@
+import { AutoMap } from "@automapper/classes";
+
 export class CreateOrderInputDto {
   products!: OrderProducts[];
-  orderStatusId?: number;
-  userId!: string;
-  createdDate?: Date;
+
+  @AutoMap()
+  userId!: number;
+
+  @AutoMap()
+  receivedName!: string;
+
+  @AutoMap()
+  address!: string;
 }
 
 class OrderProducts {
-  productId!: number;
+  id!: number;
+  productName!: string;
   quantity!: number;
+  price!: number;
+  image!: string;
 }

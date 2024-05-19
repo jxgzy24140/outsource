@@ -18,7 +18,16 @@ export class OrderDto {
   orderStatusId!: number;
 
   @AutoMap()
+  orderStatusName!: string;
+
+  @AutoMap()
   createdDate!: Date;
+
+  @AutoMap()
+  updatedDate?: Date;
+
+  @AutoMap()
+  isDeleted!: boolean;
 
   @AutoMap()
   orderDetails!: OrderDetail[] | [];

@@ -4,4 +4,6 @@ export interface ICreateProductInput {
   imageFile: string;
   price: number;
   quantity: number;
+  typeId: number;
+  size: number;
 }

@@ -8,9 +8,9 @@ export const adminLayouts: any = {
     path: "products",
     component: lazy(() => import("@/scenes/Admin/Product")),
   },
-  product: {
-    path: "products/:id",
-    component: lazy(() => import("@/scenes/Admin/Product/Edit")),
+  orders: {
+    path: "orders",
+    component: lazy(() => import("@/scenes/Admin/Order")),
   },
 };
 
@@ -19,21 +19,9 @@ export const appLayouts: any = {
     path: "home",
     component: lazy(() => import("@/scenes/Home")),
   },
-  detail: {
-    path: "product/:id",
-    component: lazy(() => import("@/scenes/Home/Detail")),
-  },
   cart: {
     path: "cart",
     component: lazy(() => import("@/scenes/Cart")),
-  },
-  payment: {
-    path: "payment",
-    component: lazy(() => import("@/scenes/Payment")),
-  },
-  search: {
-    path: "search",
-    component: lazy(() => import("@/scenes/Product/SearchResultPage")),
   },
   purchase: {
     path: "purchase",
@@ -42,10 +30,6 @@ export const appLayouts: any = {
   order: {
     path: "purchase/order/:id",
     component: lazy(() => import("@/scenes/Account/Profile/OrderDetail")),
-  },
-  collection: {
-    path: "collections/:categoryName",
-    component: lazy(() => import("@/scenes/Product/ProductCatalog")),
   },
 };
 

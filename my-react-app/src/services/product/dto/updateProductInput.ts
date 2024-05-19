@@ -4,4 +4,6 @@ export interface IUpdateProductInput {
   productName: string;
   price: number;
   quantity: number;
+  typeId: number;
+  size: number;
 }

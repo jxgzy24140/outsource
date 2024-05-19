@@ -7,20 +7,23 @@ import React from "react";
 interface IProps {
   navigate: any;
   data: any;
-  onClick: any;
+  addToCart: any;
+  getDetail: any;
 }
 
 const Product = (props: IProps) => {
   return (
-    <Col
-      className="flex flex-col w-1/4 cursor-pointer "
-      onClick={() => props.onClick(props.data.productId)}
-    >
+    <Col className="flex flex-col w-1/4 cursor-pointer">
       <div className="mx-1 my-2">
         <div className="w-full relative bg-[#f9f7f5] shadow-slate-900 container">
-          <img loading="lazy" src={props.data.image} />
+          <img onClick={() => props.getDetail(props.data)} loading="lazy" src={props.data.image} />
           <div className="add-to-cart w-[70%] absolute left-1/2 transform -translate-x-1/2 bottom-3 flex gap-x-2 justify-center items-center bg-white px-2 py-1 rounded-lg">
-            <span className="font-semibold">Thêm vào giỏ hàng</span>
+            <span
+              className="font-semibold"
+              onClick={() => props.addToCart(props.data)}
+            >
+              Thêm vào giỏ hàng
+            </span>
             <span>
               <ShoppingCartOutlined />
             </span>

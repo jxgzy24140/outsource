@@ -1,85 +1,68 @@
 import "./index.css";
 import { inject, observer } from "mobx-react";
 import Stores from "@/stores/storeIdentifier";
-import { Col, Collapse, Divider, Row, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Collapse,
+  Divider,
+  Modal,
+  Pagination,
+  Rate,
+  Row,
+} from "antd";
 import ProductStore from "@/stores/productStore";
 import withRouter from "@/components/Layout/Router/withRouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Product from "./components/Product";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import { appLayouts } from "@/components/Layout/Router/router.config";
-const { Title } = Typography;
+import OrderStore from "@/stores/orderStore";
+import { toast } from "react-toastify";
+import { useSearchParams } from "react-router-dom";
 const { Panel } = Collapse;
-
-const dummy = [
-  {
-    id: 1,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-apache-da-111.jpg",
-    price: 1499000,
-    quantity: 10,
-  },
-  {
-    id: 2,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-nighthawk-da-11-400x400.png",
-    price: 1499000,
-    quantity: 10,
-  },
-  {
-    id: 1,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-apache-da-111.jpg",
-    price: 1499000,
-    quantity: 10,
-  },
-  {
-    id: 2,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-nighthawk-da-11-400x400.png",
-    price: 1499000,
-    quantity: 10,
-  },
-  {
-    id: 1,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-apache-da-111.jpg",
-    price: 1499000,
-    quantity: 10,
-  },
-  {
-    id: 2,
-    productName: "Lakota",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-nighthawk-da-11-400x400.png",
-    price: 1499000,
-    quantity: 10,
-  },
-];
 
 interface IProps {
   navigate: any;
   productStore: ProductStore;
+  orderStore: OrderStore;
 }
-const Home = inject(Stores.ProductStore)(
+const Home = inject(
+  Stores.ProductStore,
+  Stores.OrderStore
+)(
   observer((props: IProps) => {
-    const { navigate, productStore } = props;
+    const { navigate, productStore, orderStore } = props;
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [product, setProduct] = useState<any>(null);
+    const [searchParams] = useSearchParams();
+
     useEffect(() => {
-      const init = async () => {};
+      const init = async () => {
+        const typeId: any = searchParams.get("type");
+        const keyword: any = searchParams.get("keyword");
+        await productStore.getAll(currentPage, 10, typeId, keyword);
+      };
       init();
-    }, []);
+    }, [searchParams.get("type")]);
 
-    // const handleShowProducts = async (categoryId: number) => {
-    //   console.log(categoryId);
-    // };
+    const onChange = (page) => {
+      setCurrentPage(page);
+    };
 
-    const handleProductClick = (productId: number) => {
-      navigate(`/${appLayouts.detail.path.replace(":id", productId)}`);
+    const handleAddToCart = (product: any) => {
+      orderStore.addToCart(product);
+      toast("Thêm sản phẩm vào giỏ hàng thành công!");
+    };
+
+    const handleGetDetail = (product: any) => {
+      setProduct(product);
+      setIsOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+      setProduct(null);
+      setIsOpenModal(false);
     };
 
     return (
@@ -250,12 +233,71 @@ const Home = inject(Stores.ProductStore)(
           </Col>
           <Col span={18}>
             <Row className="flex flex-wrap">
-              {dummy.map((product: any) => {
-                return <Product data={product} />;
+              {productStore.products?.items?.map((product: any) => {
+                return (
+                  <Product
+                    data={product}
+                    addToCart={handleAddToCart}
+                    getDetail={handleGetDetail}
+                  />
+                );
               })}
             </Row>
           </Col>
         </Row>
+        <Row className="flex justify-center items-center mb-2">
+          <Pagination
+            current={currentPage}
+            onChange={onChange}
+            total={productStore.products?.items?.length}
+            pageSize={10}
+            showSizeChanger={false}
+          />
+        </Row>
+        <Modal
+          footer={false}
+          open={isOpenModal}
+          onCancel={handleCloseModal}
+          style={{ width: "auto" }}
+        >
+          <Row className="gap-x-2">
+            <Col span={14}>
+              <img src={product?.image} alt="sản phẩm" />
+            </Col>
+            <Col span={9}>
+              <Row className="gap-y-2 flex justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">{product?.productName}</h2>
+                  <Rate value={5} disabled style={{ color: "black " }} />
+                  <p>
+                    <span>4.8</span>
+                    <span className="pl-2">
+                      <i className="text-gray-500 opacity-90 underline">
+                        See review
+                      </i>
+                    </span>
+                  </p>
+                  <p className="font-medium">{product?.price} VND</p>
+                  <p>
+                    <span className="font-medium">Kích thước mặt: </span>
+                    <span className="p-1 border border-solid border-black">
+                      {product?.size} mm
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <Button
+                    className="bg-[#626262] text-white"
+                    type="text"
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    Thêm vào giỏ hàng!
+                  </Button>
+                </div>
+              </Row>
+            </Col>
+          </Row>
+        </Modal>
       </Col>
     );
   })

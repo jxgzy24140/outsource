@@ -9,7 +9,7 @@ import {
 } from "@automapper/core";
 import { classes } from "@automapper/classes";
 import { User } from "../models/user.entity";
-import { UserDto } from "../dtos/user";
+import { CreateUserInputDto, UserDto } from "../dtos/user";
 
 const userProfile: MappingProfile = (mapper: any) => {
   createMap(
@@ -21,6 +21,23 @@ const userProfile: MappingProfile = (mapper: any) => {
       mapFrom((x: any) => x.role.roleName)
     ),
     forMember((dest: any) => dest.password, ignore())
+  );
+  createMap(
+    mapper,
+    CreateUserInputDto,
+    User,
+    forMember(
+      (dest: any) => dest.roleId,
+      mapFrom((x) => 1)
+    ),
+    forMember(
+      (dest: any) => dest.createdDate,
+      mapFrom((x) => new Date(Date()))
+    ),
+    forMember(
+      (dest: any) => dest.isDeleted,
+      mapFrom((x) => false)
+    )
   );
 };
 

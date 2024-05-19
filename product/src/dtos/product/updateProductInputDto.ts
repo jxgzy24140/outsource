@@ -6,11 +6,18 @@ export class UpdateProductInputDto {
   @AutoMap()
   categoryId!: number;
   @AutoMap()
+  typeId!: number;
+  @AutoMap()
   productName!: string;
   @AutoMap()
-  price!: string;
+  price!: number;
   @AutoMap()
   image!: string;
   @AutoMap()
-  quantity!: string;
+  quantity!: number;
+  @AutoMap()
+  size!: number;
+
+  @AutoMap()
+  updatedDate?: Date;
 }

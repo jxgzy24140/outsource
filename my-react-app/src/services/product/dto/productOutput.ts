@@ -6,4 +6,6 @@ export interface IProductOutput {
   image: string;
   price: number;
   quantity: number;
+  typeId: number;
+  size: number;
 }

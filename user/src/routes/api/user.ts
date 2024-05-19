@@ -5,23 +5,19 @@ const router = express.Router();
 
 router.get("/:id", async (req: any, res: any) => {
   const { id }: any = req.params;
-  try {
-    const user = await userService.get(id);
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    return res.status(200).json({
-      success: true,
-      message: "success",
-      data: user,
-    });
-  } catch {}
+  const entity = await userService.get(id);
+  if (!entity)
+    return res.status(404).json({ success: false, message: "User not found" });
+  return res.status(200).json({
+    success: true,
+    message: "success",
+    data: entity,
+  });
 });
 
 router.get("/", async (req: any, res: any) => {
-  const { pageSize, pageNumber }: any = req.query;
-  const result = await userService.getAll(pageNumber, pageSize);
+  const { pageSize, pageNumber, keyword }: any = req.query;
+  const result = await userService.getAll(pageNumber, pageSize, keyword);
   return res.status(200).json(result);
 });
 
@@ -32,26 +28,27 @@ router.post("/", async (req: any, res: any) => {
     return res.status(400).json({ success: false, message: "Created failed!" });
   return res
     .status(200)
-    .json({ success: true, message: "Created successfully" });
+    .json({ success: true, message: "Created successfully", data: result });
 });
 
 router.delete("/:id", async (req: any, res: any) => {
   const { id }: any = req.params;
   const result = await userService.delete(id);
   if (!result)
-    return res.status(404).json({ success: false, message: "Deleted failed!" });
-  return res.status(200).json({ success: false, message: "Success" });
+    return res.status(200).json({ success: false, message: "Deleted failed!" });
+  return res.status(200).json({ success: true, message: "Success" });
 });
 
-router.patch("/:id", async (req: any, res: any) => {
+router.put("/:id", async (req: any, res: any) => {
   const { id }: any = req.params;
   const input = req.body;
-  if (id != input.id)
-    return res.status(400).json({ success: false, message: "Invalid input" });
+  if (id != input.id) return res.status(400).json({ success: false });
   const result = await userService.updateUser(id, input);
   if (!result)
     return res.status(404).json({ success: false, message: "Updated failed!" });
-  return res.status(200).json({ success: false, message: "Success" });
+  return res
+    .status(200)
+    .json({ success: true, message: "Success", data: result });
 });
 
 export default router;

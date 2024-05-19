@@ -20,25 +20,6 @@ interface IProps {
   orderStore: OrderStore;
 }
 
-const dummy = [
-  {
-    id: 1,
-    productName: "Rise",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-nighthawk-da-11-400x400.png",
-    quantity: 1,
-    price: 219000,
-  },
-  {
-    id: 2,
-    productName: "Rise",
-    image:
-      "https://curnonwatch.com/wp-content/uploads/2024/05/web-nighthawk-da-11-400x400.png",
-    quantity: 1,
-    price: 219000,
-  },
-];
-
 const Cart = inject(Stores.OrderStore)(
   observer((props: IProps) => {
     const { orderStore } = props;
@@ -103,6 +84,7 @@ const Cart = inject(Stores.OrderStore)(
         }
       };
       fetchProvinces();
+      orderStore.getCart();
       form.setFieldsValue(initalValues);
     }, []);
 
@@ -134,7 +116,7 @@ const Cart = inject(Stores.OrderStore)(
       const products: any = [];
       orderStore.shoppingCart.map((item: any) => {
         products.push({
-          productId: item.productId,
+          id: item.id,
           quantity: item.quantity,
         });
       });
@@ -314,78 +296,73 @@ const Cart = inject(Stores.OrderStore)(
             </p>
           </Row>
           <Divider />
-          {dummy &&
-            dummy.map((item: any) => {
-              return (
-                <Row className="my-2">
-                  <Col className="flex justify-center items-center">
-                    <img
-                      src={item.image}
-                      className="w-[140px] h-[140px] pr-2"
-                      alt="item"
+          {orderStore?.shoppingCart?.map((item: any) => {
+            return (
+              <Row className="my-2">
+                <Col className="flex justify-center items-center">
+                  <img
+                    src={item.image}
+                    className="w-[140px] h-[140px] pr-2"
+                    alt="item"
+                  />
+                </Col>
+                <Col style={{ width: "calc(100% - 200px)" }}>
+                  <Row className="justify-start items-center">
+                    <p className="text-2xl capitalize">{item.productName}</p>
+                  </Row>
+                  <Row className="justify-between items-center py-3">
+                    <p>{item.price} VND</p>
+                    <CloseOutlined
+                      onClick={() =>
+                        orderStore.editShoppingCart(
+                          item.id,
+                          undefined,
+                          "remove"
+                        )
+                      }
                     />
-                  </Col>
-                  <Col style={{ width: "calc(100% - 200px)" }}>
-                    <Row className="justify-start items-center">
-                      <p className="text-2xl capitalize">{item.productCode}</p>
-                    </Row>
-                    <Row className="justify-between items-center py-3">
-                      <p>{item.price} VND</p>
-                      <CloseOutlined
-                        onClick={() =>
-                          orderStore.editShoppingCart(
-                            item.productId,
-                            undefined,
-                            "remove"
-                          )
-                        }
-                      />
-                    </Row>
-                    <Row className="gap-2 justify-start items-center">
-                      <p className="font-bold ">Số lượng:</p>
-                      <Button
-                        className="w-[40px] h-[40px] flex justify-center items-center"
-                        onClick={() =>
-                          orderStore.editShoppingCart(
-                            item.productId,
-                            Number(item.quantity) - 1,
-                            "update"
-                          )
-                        }
-                      >
-                        <MinusOutlined />
-                      </Button>
-                      <InputNumber
-                        // min={1}
-                        // max={editProduct.quantity}
-                        defaultValue={item.quantity}
-                        value={item.quantity}
-                        onChange={(value) =>
-                          orderStore.editShoppingCart(
-                            item.productId,
-                            value,
-                            "update"
-                          )
-                        }
-                        className="w-[60px] h-[40px] flex justify-center items-center"
-                      />
-                      <Button
-                        className="w-[40px] h-[40px] flex justify-center items-center"
-                        onClick={() =>
-                          orderStore.editShoppingCart(
-                            item.productId,
-                            Number(item.quantity) + 1,
-                            "update"
-                          )
-                        }
-                      >
-                        <PlusOutlined />
-                      </Button>
-                    </Row>
-                  </Col>
-                </Row>
-              );
-            })}
+                  </Row>
+                  <Row className="gap-2 justify-start items-center">
+                    <p className="font-bold ">Số lượng:</p>
+                    <Button
+                      className="w-[40px] h-[40px] flex justify-center items-center"
+                      onClick={() =>
+                        orderStore.editShoppingCart(
+                          item.id,
+                          Number(item.quantity) - 1,
+                          "update"
+                        )
+                      }
+                    >
+                      <MinusOutlined />
+                    </Button>
+                    <InputNumber
+                      // min={1}
+                      // max={editProduct.quantity}
+                      defaultValue={item.quantity}
+                      value={item.quantity}
+                      onChange={(value) =>
+                        orderStore.editShoppingCart(item.id, value, "update")
+                      }
+                      className="w-[60px] h-[40px] flex justify-center items-center"
+                    />
+                    <Button
+                      className="w-[40px] h-[40px] flex justify-center items-center"
+                      onClick={() =>
+                        orderStore.editShoppingCart(
+                          item.id,
+                          Number(item.quantity) + 1,
+                          "update"
+                        )
+                      }
+                    >
+                      <PlusOutlined />
+                    </Button>
+                  </Row>
+                </Col>
+              </Row>
+            );
+          })}
         </Col>
       </Row>
     );

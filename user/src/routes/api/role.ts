@@ -23,8 +23,7 @@ router.get("/:id", async (req: express.Request, res) => {
 });
 
 router.get("/", async (req: express.Request, res) => {
-  const { pageSize, pageNumber }: any = req.query;
-  const result = await roleService.getAll(pageNumber, pageSize);
+  const result = await roleService.getAll();
   return res.status(200).json(result);
 });
 
@@ -37,14 +36,20 @@ router.post("/", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  const { id }: any = req.params;
-  const result = await roleService.delete(id);
-  if (!result)
-    return res.status(404).json({ success: false, message: "Deleted failed!" });
-  return res.status(200).json({ success: false, message: "Success" });
+  router.delete("/:id", async (req: any, res: any) => {
+    try {
+      const { id }: any = req.params;
+      await roleService.delete(id);
+      return res.status(200).json({ success: true, message: "Success" });
+    } catch {
+      return res
+        .status(200)
+        .json({ success: false, message: "Deleted failed" });
+    }
+  });
 });
 
-router.patch("/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id }: any = req.params;
   const input = req.body;
   const result = await roleService.updateRole(id, input);

@@ -1,19 +1,10 @@
 import { inject, observer } from "mobx-react";
 import Stores from "@/stores/storeIdentifier";
-import { Button, Checkbox, Col, Input, Form, Row } from "antd";
-import { PRIMARY_COLOR } from "@/utils/constant";
-import Icon from "@/components/Layout/Icon";
+import { Button, Col, Input, Form, Row } from "antd";
 import withRouter from "@/components/Layout/Router/withRouter";
 import AuthenticationStore from "@/stores/authenticationStore";
 import { Link } from "react-router-dom";
-import { authLayouts } from "@/components/Layout/Router/router.config";
-import { toast } from "react-toastify";
-
-type FieldType = {
-  email?: string;
-  password?: string;
-  remember?: string;
-};
+import { useState } from "react";
 
 interface IProps {
   navigate: any;
@@ -21,10 +12,14 @@ interface IProps {
 }
 const Login = inject(Stores.AuthenticationStore)(
   observer((props: IProps) => {
-    // const { navigate, authenticationStore } = props;
+    const { authenticationStore } = props;
+    const [isLoading, setIsLoading] = useState(false);
+    const onFinish = async (values: any) => {
+      setIsLoading(true);
+      console.log("values: ", values);
 
-    const onFinish = async (values) => {
-      console.log("values", values);
+      await authenticationStore.login(values);
+      setIsLoading(false);
     };
 
     return (
@@ -69,6 +64,7 @@ const Login = inject(Stores.AuthenticationStore)(
                 htmlType="submit"
                 className="w-full flex justify-center items-center bg-[#1A1A1A] text-white font-bold"
                 id="submit-btn"
+                disabled={isLoading}
               >
                 Đăng nhập
               </Button>

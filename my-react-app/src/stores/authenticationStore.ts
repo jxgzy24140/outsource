@@ -11,18 +11,21 @@ class AuthenticationStore {
   }
 
   @action
-  public async getAuthentication() {}
+  public async getAuthentication() {
+    if (sessionStorage.getItem("accessToken")) this.isAuthenticated = true;
+    else this.isAuthenticated = false;
+  }
 
   @action
   public async login(input: ILoginInput): Promise<any> {
-    const response = await authService.login(input);
-    if (response && response.success && response.data) {
-      sessionStorage.setItem("accessToken", response.data.accessToken);
-      // response.data.user.roleId == 1
-      //   ? (window.location.href = "/home")
-      //   : (window.location.href = "/admin");
+    const response: any = await authService.login(input);
+    if (response && response.success && response.message) {
+      sessionStorage.setItem("accessToken", response.message.accessToken);
+      response.message.user.roleId == 1
+        ? (window.location.href = "/home")
+        : (window.location.href = "/admin");
       this.isAuthenticated = true;
-      this.userProfile = response.data.user;
+      this.userProfile = response.message.user;
       return true;
     }
     if (response && !response.success) {

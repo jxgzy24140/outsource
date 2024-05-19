@@ -4,7 +4,6 @@ import accountService from "@/services/account/accountService";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { authLayouts } from "@/components/Layout/Router/router.config";
 
 interface IProps {
   navigate: any;
@@ -14,15 +13,15 @@ const Register = (props: IProps) => {
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const onFinish = async (values: any) => {
-    console.log("values: ", values);
-
-    // setIsLoading(true);
-    // const result = await accountService.createUser(values);
-    // if (result && result.success) {
-    //   toast("Đăng ký thành công!");
-    //   return props.navigate("/auth/login");
-    // }
-    // setIsLoading(false);
+    setIsLoading(true);
+    const result = await accountService.createUser(values);
+    if (result && result.success) {
+      toast("Đăng ký thành công!");
+      return props.navigate("/auth/login");
+    }
+    toast("Đăng ký thất bại!");
+    setIsLoading(false);
+    form.resetFields;
   };
   return (
     <Row className="w-full h-full px-20 flex justify-center items-center gap-x-10">
@@ -34,7 +33,7 @@ const Register = (props: IProps) => {
         />
       </Col>
       <Col span={12}>
-        <Form onFinish={onFinish}>
+        <Form onFinish={onFinish} form={form}>
           <div className="py-2">
             <h1 className="text-2xl text-[#1a1a1a] font-semibold pb-2">
               GET MORE AS A MEMBER
@@ -102,6 +101,7 @@ const Register = (props: IProps) => {
               htmlType="submit"
               className="w-full flex justify-center items-center bg-[#1A1A1A] text-white font-bold"
               id="submit-btn"
+              disabled={isLoading}
             >
               Đăng ký thành viên
             </Button>

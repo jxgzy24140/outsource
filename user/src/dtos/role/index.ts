@@ -1,2 +1,2 @@
-export type { RoleDto } from "./roleDto";
-export type { CreateOrUpdateRoleInputDto } from "./createOrUpdateRoleInputDto";
+export { RoleDto } from "./roleDto";
+export { CreateOrUpdateRoleInputDto } from "./createOrUpdateRoleInputDto";

@@ -7,30 +7,46 @@ import {
 } from "typeorm";
 import { OrderStatus } from "./orderStatus.entity";
 import { OrderDetail } from "./orderDetail.entity";
+import { AutoMap } from "@automapper/classes";
 
 @Entity()
 export class Order {
+  @AutoMap()
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: false })
+  @AutoMap()
+  @Column()
   userId!: number;
 
-  @Column({ nullable: false })
+  @AutoMap()
+  @Column()
   receivedName!: string;
 
-  @Column({ nullable: false })
+  @AutoMap()
+  @Column()
   address!: string;
 
-  @Column({ nullable: false })
+  @AutoMap()
+  @Column()
   orderStatusId!: number;
 
-  @Column({ nullable: false })
+  @AutoMap()
+  @Column()
   createdDate!: Date;
 
-  @ManyToOne(() => OrderStatus)
-  orderStatus!: OrderStatus;
+  @AutoMap()
+  @Column({ nullable: true })
+  updatedDate?: Date;
 
+  @AutoMap()
+  @Column()
+  isDeleted!: boolean;
+
+  @ManyToOne(() => OrderStatus)
+  orderStatus?: OrderStatus;
+
+  @AutoMap()
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails!: OrderDetail[];
 }

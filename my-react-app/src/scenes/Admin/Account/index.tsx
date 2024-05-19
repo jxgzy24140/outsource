@@ -5,7 +5,6 @@ import {
   Button,
   Col,
   Form,
-  Input,
   Modal,
   Popconfirm,
   Select,
@@ -17,6 +16,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { localeData, weekdays } from "moment";
 import dayjs from "dayjs";
+import { EditOutlined } from "@ant-design/icons";
 dayjs.extend(weekdays);
 dayjs.extend(localeData);
 
@@ -25,29 +25,31 @@ interface IProps {
   accountStore: AccountStore;
 }
 
-const options = [
-  { value: true, label: "Active" },
-  { value: false, label: "InActive" },
-];
-
-const roleOptions = [
-  { value: 1, label: "Customer" },
-  { value: 2, label: "Admin" },
-];
-
-const columns: any = ({ navigate, accountStore, showModal }) => [
+const roles = [
   {
-    title: "#",
-    render: (_, record, index) => <p className="text-center"> {index}</p>,
+    value: 1,
+    label: <p>Customer</p>,
   },
   {
-    title: "Full Name",
-    key: "fullName",
-    render: (record: any) => (
-      <p className="text-center">
-        {record.firstName} {record.lastName}
-      </p>
-    ),
+    value: 2,
+    label: <p>Admin</p>,
+  },
+];
+
+const columns: any = ({
+  navigate,
+  accountStore,
+  onOpenEditModal,
+  onConfirmUpdate,
+}) => [
+  {
+    title: "ID",
+    render: (_, record, index) => <p className="text-center"> {record.id}</p>,
+  },
+  {
+    title: "Quyền",
+    dataIndex: "roleName",
+    key: "roleName",
   },
   {
     title: "Email",
@@ -55,49 +57,12 @@ const columns: any = ({ navigate, accountStore, showModal }) => [
     key: "email",
   },
   {
-    title: "Phone",
-    dataIndex: "phoneNumber",
-    key: "phoneNumber",
+    title: "Tên",
+    dataIndex: "fullName",
+    key: "fullName",
   },
   {
-    title: "Gender",
-    key: "gender",
-    render: (record: any) => (record.gender == true ? "Male" : "Female"),
-  },
-  {
-    title: "Active",
-    key: "active",
-    render: (record: any) => {
-      const bgColorClass = record.active ? "bg-blue-500" : "bg-red-500";
-      const classNames = `px-2 py-1 text-white text-center ${bgColorClass}`;
-      return (
-        <p className={classNames}>{record.active ? "Active" : "InActive"}</p>
-      );
-    },
-  },
-  {
-    title: "Role",
-    key: "role",
-    render: (record: any) => {
-      const bgColorClass = record.roleId == 1 ? "bg-blue-500" : "bg-orange-500";
-      const classNames = `px-2 py-1 text-white text-center ${bgColorClass}`;
-      return (
-        <p className={classNames}>
-          {record.roleId == 1 ? "Customer" : "Admin"}
-        </p>
-      );
-    },
-  },
-  {
-    title: "Avatar",
-    dataIndex: "avatar",
-    key: "avatar",
-    render: (image) => (
-      <img className="w-[50px] h-[50px]" src={image ?? image} alt={"avatar"} />
-    ),
-  },
-  {
-    title: "Created Date",
+    title: "Ngày Tạo",
     key: "createdDate",
     render: (record) => (
       <p>
@@ -108,7 +73,7 @@ const columns: any = ({ navigate, accountStore, showModal }) => [
     ),
   },
   {
-    title: "Last Updated",
+    title: "Ngày Cập Nhật",
     key: "updatedDate",
     render: (record) => (
       <p>
@@ -119,18 +84,24 @@ const columns: any = ({ navigate, accountStore, showModal }) => [
     ),
   },
   {
-    title: "Action",
+    title: "Hành Động",
     key: "action",
     render: (record: any) => {
       const confirm = async () => {
-        const result = await accountStore.deleteUser(record.userId);
-        if (result) toast("Deleted success");
-        else toast("Deleted failed");
+        const result = await accountStore.deleteUser(record.id);
+        if (result) toast("Xóa thành công!");
+        else toast("Xóa thất bại");
       };
 
       return (
         <Space size="middle">
-          <Button onClick={() => showModal(record.userId)}>Edit</Button>
+          <a
+            className="flex items-center gap-x-1"
+            onClick={() => onOpenEditModal(record)}
+          >
+            <EditOutlined />
+            Chỉnh sửa
+          </a>
           <Popconfirm
             title="Xóa người dùng"
             description="Bạn có chắc sẽ xóa người dùng này?"
@@ -139,7 +110,7 @@ const columns: any = ({ navigate, accountStore, showModal }) => [
             cancelText="Hủy"
             okButtonProps={{ className: "bg-blue-500 text-white" }}
           >
-            <Button danger>Delete</Button>
+            <Button danger>Xóa</Button>
           </Popconfirm>
         </Space>
       );
@@ -153,89 +124,83 @@ const Account = inject(Stores.AccountStore)(
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editRow, setEditRow] = useState<any>(null);
     const [form] = Form.useForm();
-    const showModal = async (id: any) => {
-      await accountStore.getUser(id);
-      const result: any = accountStore.editUser;
-      form.setFieldValue("userId", result.userId);
-      form.setFieldValue("email", result.email);
-      form.setFieldValue("roleId", result.roleId);
-      form.setFieldValue("active", result.active);
+    const showModal = async (record: any) => {
+      console.log("record: ", record);
+    };
+
+    const initValues = async () => {
+      await accountStore.getUsers(pageNumber, pageSize);
+    };
+    useEffect(() => {
+      initValues();
+    }, [pageNumber]);
+
+    const onOpenEditModal = async (record: any) => {
+      setEditRow(record);
+      form.setFieldsValue(record);
       setIsModalOpen(true);
     };
 
-    const handleOk = () => {
+    const onChangeCurrentPage = (page) => {
+      setPageNumber(page);
+    };
+
+    const onCloseModal = () => {
       setIsModalOpen(false);
+      setEditRow(null);
     };
 
-    const handleCancel = () => {
-      setIsModalOpen(false);
-      accountStore.cleanUp();
-    };
-    useEffect(() => {
-      init();
-    }, []);
-
-    const init = async () => {
-      await accountStore.getUsers(pageNumber, pageSize);
-    };
-
-    const onFinish = async (values: any) => {
-      Modal.confirm({
-        onOk: async () => {
-          const updatedResult = await accountStore.updateUserRoleAndActive(
-            values.userId,
-            {
-              userId: values.userId,
-              roleId: values.roleId,
-              active: values.active,
-            }
-          );
-          if (updatedResult) toast("Updated success!");
-          else toast("Updated failed");
-        },
-        okText: "Xác nhận yêu cầu!",
-      });
-
-      handleCancel();
+    const onFinish = async ({ roleId }) => {
+      if (roleId != editRow.roleId) {
+        const input = { ...editRow, roleId };
+        const result = await accountStore.updateUser(editRow.id, input);
+        if (result) toast("Cập nhật thành công!");
+        else toast("Cập nhật thất bại!");
+      }
     };
 
     return (
-      <Col className="mx-auto min-h-full h-full">
+      <Col className="mx-auto min-h-screen h-full">
         <Table
-          columns={columns({ navigate, accountStore, showModal })}
-          dataSource={accountStore.users?.items && accountStore.users?.items}
-          pagination={{ pageSize }}
+          rowKey={Math.random().toString()}
+          columns={columns({
+            navigate,
+            accountStore,
+            showModal,
+            onOpenEditModal,
+          })}
+          dataSource={accountStore.users?.items}
+          pagination={{
+            pageSize,
+            total: accountStore.users?.total,
+            onChange: onChangeCurrentPage,
+          }}
         />
         <Modal
-          title="Edit"
+          title="Cập nhật"
           open={isModalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={false}
+          onCancel={onCloseModal}
+          footer={[
+            <Button
+              key="1"
+              onClick={() => {
+                setIsModalOpen(false);
+                document.getElementById("submit-btn")?.click();
+              }}
+              className="bg-blue-500 text-white"
+            >
+              Lưu Thay Đổi
+            </Button>,
+          ]}
         >
           <Form form={form} onFinish={onFinish}>
-            <Form.Item name="userId" style={{ display: "none" }}>
-              <Input />
-            </Form.Item>
-            <Form.Item name="email">
-              <Input disabled />
-            </Form.Item>
-            <Form.Item name="active">
-              <Select options={options} />
-            </Form.Item>
             <Form.Item name="roleId">
-              <Select options={roleOptions} />
+              <Select options={roles} />
             </Form.Item>
-            <Form.Item>
-              <Button onClick={handleCancel}>Hủy</Button>
-              <Button
-                htmlType="submit"
-                type="primary"
-                className="bg-blue-500 text-white ml-2"
-              >
-                Lưu thay đổi
-              </Button>
+            <Form.Item style={{ display: "none" }}>
+              <Button htmlType="submit" id="submit-btn"></Button>
             </Form.Item>
           </Form>
         </Modal>

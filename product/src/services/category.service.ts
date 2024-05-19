@@ -5,9 +5,11 @@ class CategoryService {
   private repository = AppDataSource.getRepository(Category);
   async createAsync(input: Category): Promise<Category | null> {
     try {
-      const newRole = this.repository.create(input);
-      await this.repository.save(newRole);
-      return newRole;
+      const entity = this.repository.create(input);
+      entity.createdDate = new Date();
+      entity.isDeleted = false;
+      await this.repository.save(entity);
+      return entity;
     } catch (err: any) {
       throw new Error(err);
     }
@@ -15,23 +17,27 @@ class CategoryService {
 
   async updateAsync(id: number, input: Category): Promise<Category | null> {
     try {
-      await this.repository.update(id, input);
-      return await this.repository.findOne({
-        where: { id },
-      });
+      const entity = await this.repository.findOne({ where: { id } });
+      if (!entity) return null;
+
+      entity.categoryName = input.categoryName;
+      entity.updatedDate = new Date();
+      await this.repository.save(entity);
+      return entity;
     } catch (err: any) {
       throw new Error(err);
     }
   }
 
-  async deleteAsync(id: number): Promise<Category | null> {
+  async deleteAsync(id: number) {
     try {
-      const role = await this.repository.findOne({
+      const entity = await this.repository.findOne({
         where: { id },
       });
-      if (!role) return null;
-      await this.repository.delete(id);
-      return role;
+      if (!entity) return null;
+      entity.isDeleted = true;
+      entity.updatedDate = new Date();
+      await this.repository.update(id, entity);
     } catch {
       return null;
     }
@@ -49,15 +55,9 @@ class CategoryService {
     }
   }
 
-  async getAllAsync(
-    pageNumber: number,
-    pageSize: number
-  ): Promise<Category[] | []> {
+  async getAllAsync(): Promise<Category[] | []> {
     try {
-      return await this.repository.find({
-        skip: (pageNumber - 1) * pageSize,
-        take: pageSize,
-      });
+      return await this.repository.find();
     } catch (err: any) {
       throw new Error(err);
     }

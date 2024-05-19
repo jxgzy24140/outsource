@@ -19,10 +19,10 @@ router.get("/:id", async (req: any, res: any) => {
   } catch {}
 });
 
-router.get("/", async (req: any, res: any) => {
+router.get("/", identityMiddleware, async (req: any, res: any) => {
   const { pageSize, pageNumber }: any = req.query;
-  const result = await productService.getAllAsync(pageNumber, pageSize);
-  return res.status(200).json(result);
+  const result = await productService.getAllAsync(req, pageNumber, pageSize);
+  return res.status(200).json({ success: true, data: result });
 });
 
 router.post("/", async (req: any, res: any) => {
@@ -32,18 +32,10 @@ router.post("/", async (req: any, res: any) => {
     return res.status(400).json({ success: false, message: "Created failed!" });
   return res
     .status(200)
-    .json({ success: true, message: "Created successfully" });
+    .json({ success: true, message: "Created successfully", data: result });
 });
 
-router.delete("/:id", async (req: any, res: any) => {
-  const { id }: any = req.params;
-  const result = await productService.deleteAsync(id);
-  if (!result)
-    return res.status(404).json({ success: false, message: "Deleted failed!" });
-  return res.status(200).json({ success: false, message: "Success" });
-});
-
-router.patch("/:id", async (req: any, res: any) => {
+router.put("/:id", async (req: any, res: any) => {
   const { id }: any = req.params;
   const input = req.body;
   if (id != input.id)
@@ -51,7 +43,9 @@ router.patch("/:id", async (req: any, res: any) => {
   const result = await productService.updateAsync(id, input);
   if (!result)
     return res.status(404).json({ success: false, message: "Updated failed!" });
-  return res.status(200).json({ success: false, message: "Success" });
+  return res
+    .status(200)
+    .json({ success: true, message: "Success", data: result });
 });
 
 export default router;

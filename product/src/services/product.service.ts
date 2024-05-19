@@ -6,6 +6,7 @@ import {
   ProductDto,
 } from "../dtos/product";
 import { Product } from "../models/product.entity";
+import { Like } from "typeorm";
 class ProductService {
   private readonly repository;
   constructor() {
@@ -14,6 +15,7 @@ class ProductService {
 
   async createAsync(input: CreateProductInputDto): Promise<ProductDto | null> {
     try {
+      const date = Date();
       const check = await this.repository.findOne({
         where: { productName: input.productName },
       });
@@ -21,8 +23,16 @@ class ProductService {
       const entity = this.repository.create(
         mapper.map(input, CreateProductInputDto, Product)
       );
+      entity.createdDate = new Date(date);
+      entity.isDeleted = false;
       await this.repository.save(entity);
-      return mapper.map(entity, Product, ProductDto);
+
+      const createdEntity = await this.repository.findOne({
+        where: { id: entity.id },
+        relations: ["category"],
+      });
+
+      return mapper.map(createdEntity, Product, ProductDto);
     } catch (err: any) {
       throw new Error(err);
     }
@@ -36,27 +46,36 @@ class ProductService {
       const entity = await this.repository.findOne({ where: { id } });
       if (!entity) return null;
 
+      input.updatedDate = new Date();
+
       await this.repository.save(
         mapper.map(input, UpdateProductInputDto, Product)
       );
-      return await this.repository.findOne({
+
+      const updatedEntity = await this.repository.findOne({
         where: { id },
+        relations: ["category"],
       });
+
+      return mapper.map(updatedEntity, Product, ProductDto);
     } catch (err: any) {
       throw new Error(err);
     }
   }
 
-  async deleteAsync(id: number): Promise<ProductDto | null> {
+  async deleteAsync(id: number) {
     try {
+      const date = Date();
       const entity = await this.repository.findOne({
         where: { id },
       });
       if (!entity) return null;
-      await this.repository.delete(id);
-      return entity;
+      entity.isDeleted = true;
+      entity.updatedDate = new Date(date);
+      await this.repository.update(id, entity);
+      return true;
     } catch {
-      return null;
+      return false;
     }
   }
 
@@ -75,20 +94,49 @@ class ProductService {
 
   async getAllAsync(
     pageNumber: number,
-    pageSize: number
-  ): Promise<ProductDto[] | any[]> {
+    pageSize: number,
+    typeId?: number,
+    keyword?: string
+  ) {
     try {
+      const searchCondition: any = keyword
+        ? { productName: Like(`%${keyword}%`) }
+        : {};
+      if (typeId && typeId !== undefined) {
+        searchCondition.typeId = typeId;
+      }
+      searchCondition.isDeleted = false;
+
       const entities = await this.repository.find({
+        where: searchCondition,
         skip: (pageNumber - 1) * pageSize,
         take: pageSize,
         relations: ["category"],
       });
-      return entities.length
-        ? mapper.mapArray(entities, Product, ProductDto)
-        : [];
+      const total = await this.repository.count({ where: searchCondition });
+      return {
+        items: mapper.mapArray(entities, Product, ProductDto),
+        total: total,
+        currentPage: pageNumber,
+        pageSize: pageSize,
+      };
     } catch (err: any) {
       throw new Error(err);
     }
+  }
+
+  async createOrder(input: any) {
+    for (let i = 0; i < input.length; i++) {
+      const entity = await this.repository.findOne({
+        where: {
+          id: input[i].id,
+          price: input[i].price,
+          quantity: input[i].quantity,
+        },
+      });
+      if (!entity) return null;
+    }
+    return true;
   }
 }
 

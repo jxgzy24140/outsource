@@ -1,7 +1,15 @@
+import { AutoMap } from "@automapper/classes";
+
 export class CreateUserInputDto {
-  firstName!: string;
-  lastName!: string;
+  @AutoMap()
+  fullName!: string;
+
+  @AutoMap()
   email!: string;
+
+  @AutoMap()
   password!: string;
+
+  @AutoMap()
   roleId?: number;
 }

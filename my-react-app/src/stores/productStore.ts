@@ -14,7 +14,6 @@ class ProductStore {
     | IUpdateProductInput
     | ProductOutputDto
     | any = null;
-  @observable homeProducts!: any;
 
   constructor() {
     makeAutoObservable(this);
@@ -22,86 +21,64 @@ class ProductStore {
   @action
   async get(id: number): Promise<any> {
     const response = await productService.getProduct(id);
-    if (response && response.success && response.data) {
+
+    if (response.success) {
       this.editProduct = response.data;
     }
   }
 
   @action
-  async getHomeProducts() {
-    const response = await productService.getHomeProducts();
-    if (response && response.success && response.data) {
-      this.homeProducts = response.data.items[0];
-    }
-  }
-
-  @action
-  async getProductByCatalog(
-    categoryName: string,
+  async getAll(
     pageNumber: number,
     pageSize: number,
-    scat?: string,
-    min?: string,
-    max?: string,
-    sort?: string
+    typeId?: number,
+    keyword?: string
   ) {
-    const response = await productService.getProductCatalog(
-      categoryName,
+    const response: any = await productService.getProducts(
       pageNumber,
       pageSize,
-      scat,
-      min,
-      max,
-      sort
+      typeId,
+      keyword
     );
-    if (response && response.success && response.data) {
-      this.products = response.data;
-    }
-  }
 
-  @action
-  async getAll(pageNumber: number, pageSize: number, sortByPrice?: boolean) {
-    const response = await productService.getProducts(pageNumber, pageSize);
-    if (response && response.success && response.data) {
-      this.products = response.data;
+    if (response) {
+      this.products = response;
     }
   }
 
   @action
   async create(input: ICreateProductInput) {
-    const response = await productService.createProduct(input);
-    if (response) {
-      this.editProduct = null;
-      this.products.items.map((product: any) => {
-        if (response.data && product.id == response.data.id) product = response;
-        return product;
-      });
+    const response: any = await productService.createProduct(input);
+    if (response.success) {
+      this.products.items = [...this.products.items, response.data];
+      this.products.total = this.products.total + 1;
+      return true;
     }
-    return response;
+    return false;
   }
 
   @action
   async update(id: number, input: IUpdateProductInput) {
     const response = await productService.updateProduct(id, input);
-    if (response && response.data) {
+    if (response && response.success) {
       this.editProduct = null;
       this.products.items = this.products.items.map((item: any) => {
-        if (item.id == input.id) item = response;
+        if (item.id == input.id) item = response.data;
         return item;
       });
-      return response;
+      return true;
     }
-    return response;
+    return false;
   }
 
   @action
   async delete(id: number) {
     const response = await productService.deleteProduct(id);
-    if (response && response.data) {
+    if (response && response.success) {
       this.editProduct = null;
-      this.products.items = this.products.items.map((product: any) => {
-        if (product.id != id) return product;
-      });
+      this.products.items = this.products.items.filter(
+        (product) => product?.id != id
+      );
       this.products.total = this.products.total - 1;
       return true;
     }
@@ -113,14 +90,11 @@ class ProductStore {
     this.editProduct = {
       categoryId: 0,
       productName: "",
-      productCode: "",
-      description: "",
       image: "",
       price: 0,
-      discount: 0,
       quantity: 0,
-      inStock: true,
-      creationId: 0,
+      size: 0,
+      typeId: 0,
     };
   }
 }

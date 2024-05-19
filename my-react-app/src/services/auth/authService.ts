@@ -4,8 +4,13 @@ import { IHttpRequest } from "../httpRequestDto";
 
 class AuthService {
   async login(input: ILoginInput): Promise<IHttpRequest<ILoginOutput>> {
-    const response = await http.post("auth/login", input);
-    return response.data;
+    const response = await http.post(
+      "http://localhost:8081/api/v1/identity/login",
+      input
+    );
+    console.log("res: ", response);
+
+    return response.data.result;
   }
 }
 

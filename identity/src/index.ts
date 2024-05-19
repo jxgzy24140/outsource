@@ -18,6 +18,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("", api);
 
-server.listen(8080, () => {
-  console.log("Server is running on port 8080");
+server.listen(8081, () => {
+  console.log("[IDENTITY SERVICE] is running on port 8081");
 });

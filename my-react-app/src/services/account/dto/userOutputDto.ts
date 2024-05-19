@@ -1,8 +1,12 @@
 export interface IUserOutputDto {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: number;
+  fullName: string;
   email: string;
+  
   roleId: number;
   roleName: string;
+
+  createdDate: Date;
+  updatedDate: Date;
+  isDeleted: boolean;
 }
